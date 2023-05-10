@@ -1,46 +1,72 @@
 const form = document.querySelector('form');
 const formInputs = document.querySelectorAll('.form-input');
-const inputName = document.querySelector('#name');
 const privacyCheckbox = document.querySelector('.form-checkbox');
 const submitBtn = document.querySelector('.form-btn');
 
-function checkInputs() {
-    let filledUp = true;
+const inputName = document.querySelector('#name');
+const inputEmail = document.querySelector('#email');
+const inputDOB = document.querySelector('#dob');
+const inputPhone = document.querySelector('#phone');
+const inputPrivacy = document.querySelector('#privacy-agreement');
 
-    formInputs.forEach(input => {
-        if (input.value === '') {
-            filledUp = false;
-        }
-    });
+console.log(formInputs)
+let inputStates = {
+    hasName: false,
+    hasEmail: false,
+    hasDOB: false,
+    hasPhone: false,
+    hasAgree: false,
+};
+console.log(`inputStates:`);
+console.log(inputStates)
 
-    if (filledUp && privacyCheckbox.checked) {
+const checkInputs = (event) => {
+    //let { hasName, hasEmail, hasDOB, hasPhone, hasAgree } = inputStates;
+    inputStates.hasName = inputName.value != '' ? true : false;
+    inputStates.hasEmail = inputEmail.value != '' ? true : false;
+    inputStates.hasDOB = inputDOB.value != '' ? true : false;
+    inputStates.hasPhone = inputPhone.value != '' ? true : false;
+    inputStates.hasAgree = inputPrivacy.checked;
+
+    console.log(`inputStates:`);
+    console.table(inputStates);
+    let { hasName, hasEmail, hasDOB, hasPhone, hasAgree } = inputStates
+
+    if (hasName && hasEmail && hasDOB && hasPhone && hasAgree) {
         submitBtn.disabled = false;
     } else {
         submitBtn.disabled = true;
     }
+    return event;
 }
+
+privacyCheckbox.addEventListener('change', checkInputs);
+formInputs.forEach(input => {
+    input.addEventListener('input', checkInputs);
+});
+
 
 function resetInputs() {
     formInputs.forEach(input => {
         input.value = '';
-    });
+    })
     privacyCheckbox.checked = false;
     submitBtn.disabled = true;
 }
 
-formInputs.forEach(input => {
-    input.addEventListener('input', checkInputs());
-});
-
-privacyCheckbox.addEventListener('change', checkInputs);
-
 form.addEventListener('submit', (e) => {
     e.preventDefault();
-    newUser = { name: inputName.value, email: `${inputName.value}@gmail.com` };
-
-    console.log(`submited: ${inputName.value}`);
-
+    newUser = {
+        name: inputName.value,
+        email: inputEmail.value,
+        dob:inputDOB.value,
+        phone:inputPhone.value,
+        privacyAgreement: inputPrivacy.checked
+    };
+    sendUserData(newUser);
     resetInputs();
+    console.log(`submited:`);
+    console.log(newUser);
 });
 
 async function sendUserData(userData) {
@@ -52,5 +78,5 @@ async function sendUserData(userData) {
         },
         body: JSON.stringify(userData)
     }
-    return await fetch(`/user/${userData.user}`, request);
+    return await fetch(`/user`, request);
 }
